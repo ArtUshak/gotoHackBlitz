@@ -1,3 +1,5 @@
+import time
+
 events = []
 steps = []
 
@@ -30,6 +32,8 @@ def process_event(event):
                         steps[step_pos]['revisitors'] += [user_id]
     steps[step_pos]['visitors'][user_id]['last_time'] = time
 
+t1 = time.perf_counter()
+
 with open('course-217-structure.csv') as file_steps:
     for line in file_steps:
         line = line.strip()
@@ -37,6 +41,8 @@ with open('course-217-structure.csv') as file_steps:
         if data[0] == 'course_id':
             continue
         register_step_data(int(data[5]), int(data[2]), int(data[4]), int(data[6]))
+
+t2 = time.perf_counter()
 
 with open('course-217-events.csv') as file_events:
     for line in file_events:
@@ -46,17 +52,31 @@ with open('course-217-events.csv') as file_events:
             continue
         register_event_data(int(data[0]), data[1], int(data[2]), int(data[3]))
 
+t3 = time.perf_counter()
+
 steps.sort(key=lambda step: [step['module_position'], step['lesson_position'], step['step_position']])
 
 events.sort(key=lambda event: event['time'])
 
+t4 = time.perf_counter()
+
 for event in events:
     process_event(event)
+
+t5 = time.perf_counter()
 
 for step in steps:
     step['revisit_k'] = len(step['revisitors']) / len(step['visitors'])
 
 result_steps = sorted(steps, key=lambda step: step['revisit_k'])[::-1]
+
+t6 = time.perf_counter()
+
+print(t2 - t1)
+print(t3 - t2)
+print(t4 - t3)
+print(t5 - t4)
+print(t6 - t5)
 
 for result_step in result_steps[0:9]:
     print(result_step['step_id'], end=',')
